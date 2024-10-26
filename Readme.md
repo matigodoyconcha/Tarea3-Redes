@@ -33,6 +33,8 @@ python3 fragmentizador.py 127.0.0.4:5003
 Esto lo que hará será red de uniones de "routers" de la siguiente forma:
 
 ![Grafo](Foto.png)
+
+
 Luego, se puede ejecutar el siguiente código en una nueva terminal:
 
 ```
