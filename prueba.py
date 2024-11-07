@@ -69,7 +69,7 @@ mensaje_de_prueba = "Estoy muy feliz de que esto este funcionando, alo que pasa 
 
 # Parámetros para el datagrama
 src_ip = "127.0.0.1"  # IP de origen
-dst_ip = "10.42.76.32"  # IP de destino
+dst_ip = "127.0.0.4"  # IP de destino
 protocol = 17  # Protocolo UDP
 ID = 1  # Identificación del datagrama
 flags = 0  # Flags (0 para el último fragmento)
