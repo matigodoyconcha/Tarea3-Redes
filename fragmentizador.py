@@ -76,7 +76,7 @@ class Router:
                     for enlace in self.enlaces:
                         actualMTU = enlace.MTU
                         if largo_msg > actualMTU:
-                            fragmento, mensaje,nuevo_offset = dividir_mensaje(mensaje, enlace.MTU, src_ip, dst_ip, protocol, identification, 1, nuevo_offset)
+                            fragmento, mensaje,nuevo_offset = dividir_mensaje(mensaje, enlace.MTU, src_ip, dst_ip, protocol, identification, 1, nuevo_offset,ttl-1)
                             largo_msg = len(mensaje)
                             if largo_msg == 0:
                                 break
@@ -85,7 +85,7 @@ class Router:
                             time.sleep(1)
                         else:
                             print("QUEDA EL ULTIMO")
-                            mensaje = crear_datagrama_ip(src_ip, dst_ip, protocol, mensaje, identification, flags, nuevo_offset)
+                            mensaje = crear_datagrama_ip(src_ip, dst_ip, protocol, mensaje, identification, flags, nuevo_offset,ttl-1)
                             self.socket.sendto(mensaje, (enlace.ip, enlace.direccion))
                             time.sleep(1)
                             mensaje = ""
@@ -193,7 +193,7 @@ class Router:
             mf_flag = 1 if (i + max_payload_size) < len(mensaje) else 0
             
             # Crear el fragmento con el offset correcto en unidades de 8 bytes
-            datagrama_fragmentado = crear_datagrama_ip(src_ip, dst_ip, protocol, fragmento, ID, mf_flag, offset_actual // 8)
+            datagrama_fragmentado = crear_datagrama_ip(src_ip, dst_ip, protocol, fragmento, ID, mf_flag, offset_actual // 8,ttl-1)
             print(f"Creamos un mensaje con flag:{mf_flag}")
             
             # Añadir el fragmento a la lista de fragmentos
@@ -204,7 +204,7 @@ class Router:
             
         return fragmentos
 
-def crear_datagrama_ip(src_ip, dst_ip, protocol, mensaje, ID, flags, offset):
+def crear_datagrama_ip(src_ip, dst_ip, protocol, mensaje, ID, flags, offset,ttl):
     version = 4
     ihl = 5
     tos = 0
@@ -212,7 +212,6 @@ def crear_datagrama_ip(src_ip, dst_ip, protocol, mensaje, ID, flags, offset):
     identification = ID
     flags = flags
     fragment_offset = offset
-    ttl = 10
     header_checksum = 0
 
     print(f"version: {version}, ihl: {ihl}, tos: {tos}, total_length: {total_length}, identification: {identification}")
@@ -259,7 +258,7 @@ def calcular_checksum(header):
     checksum = ~checksum & 0xFFFF
     return checksum
 
-def dividir_mensaje(mensaje, MTU, src_ip, dst_ip, protocol, ID, flags, offset):
+def dividir_mensaje(mensaje, MTU, src_ip, dst_ip, protocol, ID, flags, offset,ttl):
     header_size = 20
     max_payload_size = (MTU - header_size)-(MTU - header_size)%8
 
@@ -268,7 +267,7 @@ def dividir_mensaje(mensaje, MTU, src_ip, dst_ip, protocol, ID, flags, offset):
     mensaje_restante = mensaje[max_payload_size:]
     
     # El offset debe estar en unidades de 8 bytes
-    datagrama_fragmentado = crear_datagrama_ip(src_ip, dst_ip, protocol, fragmento, ID, flags, offset)
+    datagrama_fragmentado = crear_datagrama_ip(src_ip, dst_ip, protocol, fragmento, ID, flags, offset,ttl-1)
     
     # El nuevo offset para el siguiente fragmento debe ser ajustado
     nuevo_offset = offset + len(fragmento)//8
