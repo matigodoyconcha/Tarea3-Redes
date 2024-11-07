@@ -118,9 +118,6 @@ class Router:
                 # Desempaquetar el datagrama
                 src_ip, dst_ip, protocolo, mensaje, ID, flags, offset, ttl = self.desempaquetar_datagrama_ip(datagrama)
                 
-                if ttl <= 0:
-                    #Se descarta el mensaje si es que ttl es menor o igual a 0.
-                    continue
 
                 if dst_ip == self.ip:
                     print(f"Procesando fragmento para este router: ID {ID}, offset {offset}, flags {flags}, ttl {ttl}")
@@ -149,6 +146,9 @@ class Router:
                             print(f"Fragmentos faltantes para ID {ID}, esperando...")
                 else:
                     print(f"Mensaje no destinado a este router, reenviando (ID {ID}), ip target {dst_ip}, con un offset de {offset}")
+                    if ttl <= 0:
+                        #Se descarta el mensaje si es que ttl es menor o igual a 0.
+                        continue
                     self.enviar(datagrama, dst_ip)
 
             for msg_id in list(tiempos_por_id):
